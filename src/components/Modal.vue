@@ -3,31 +3,30 @@
     <div class="modal-mask">
       <div class="modal-wrapper">
         <div class="modal-container">
-
-          <div class="modal-header">
-            <slot name="header">
-              <h3>{{object.id}}</h3>
-            </slot>
-          </div>
-
-          <div class="modal-body">
-            <slot name="body">
-              <img :src="object.url"/>
-            </slot>
-          </div>
-
-          <div class="modal-footer">
-            <slot name="footer">
-              <div
-              v-for="(comment, index) in comments"
-              :key="index">
-                <h3>{{comment.text}}</h3>
-                <h3>{{comment.date}}</h3>
-              </div>
-              <button class="modal-default-button" @click="$emit('close')">
-                OK
-              </button>
-            </slot>
+          <div class="modal-info">
+            <img
+            class="modal-img"
+            :src="object.url"/>
+            <div
+            v-for="(comment, index) in object.comments"
+            :key="index">
+              <h3 class="modal-date">{{comment.date}}</h3>
+              <h3 :title="comment.name">{{comment.text}}</h3>
+            </div>
+            <a-input
+            class="modal-input"
+            v-model="nameComment"
+            placeholder="Ваше имя" />
+            <a-input
+            class="modal-input"
+            v-model="textComment"
+            placeholder="Ваш комментарий" />
+            <a-button
+            type="primary"
+            @click="sendNewComment">
+              Оставить комментарий
+            </a-button>
+            <button class="modal-default-button" @click="$emit('close')"/>
           </div>
         </div>
       </div>
@@ -35,51 +34,52 @@
   </transition>
 </template>
 <script>
-import axios from 'axios'
 export default {
   name: 'Modal',
   props: {
-    id: {
-      type: Number,
+    object: {
+      type: Object,
       required: true
     }
   },
   data: function () {
     return {
-      object: null
+      nameComment: '',
+      textComment: ''
     }
   },
-  created () {
-    axios
-      .get('https://boiling-refuge-66454.herokuapp.com/images/' + this.id)
-      .then((response) => {
-        this.object = response.data
-      })
-      .catch(error => console.log(error))
-  },
-  computed: {
-    url () {
-      return this.object.url
+  methods: {
+    convertDate (date) {
+      let day = date.getDate()
+      if (day < 10) day = '0' + day
+      let month = date.getMonth() + 1
+      if (month < 10) month = '0' + month
+      return day + '.' + month + '.' + date.getFullYear()
     },
-    comments () {
-      return this.object.comments
+    sendNewComment () {
+      this.$emit('addComment', {
+        name: this.nameComment,
+        text: this.textComment,
+        date: this.convertDate(new Date())
+      })
+      this.nameComment = ''
+      this.textComment = ''
     }
   }
 }
 </script>
 
 <style scoped>
-img {
-  width: 200px;
+.modal-img {
+  width: 300px;
 }
 .modal-mask {
   position: fixed;
-  z-index: 9998;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, .5);
+  background-color: rgba(0, 0, 0, .7);
   display: table;
   transition: opacity .3s ease;
 }
@@ -90,9 +90,10 @@ img {
 }
 
 .modal-container {
-  width: 400px;
+  width: 619px;
+  height: 425px;
   margin: 0px auto;
-  padding: 20px 30px;
+  padding: 10px;
   background-color: #fff;
   border-radius: 2px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, .33);
@@ -100,39 +101,23 @@ img {
   font-family: Helvetica, Arial, sans-serif;
 }
 
-.modal-header h3 {
-  margin-top: 0;
-  color: #42b983;
-}
-
-.modal-body {
-  margin: 20px 0;
-}
-
 .modal-default-button {
   float: right;
-}
-
-/*
- * The following styles are auto-applied to elements with
- * transition="modal" when their visibility is toggled
- * by Vue.js.
- *
- * You can easily play with the modal transition by editing
- * these styles.
- */
-
-.modal-enter {
-  opacity: 0;
-}
-
-.modal-leave-active {
-  opacity: 0;
 }
 
 .modal-enter .modal-container,
 .modal-leave-active .modal-container {
   -webkit-transform: scale(1.1);
   transform: scale(1.1);
+}
+.modal-input {
+  width: 300px;
+}
+.modal-info {
+  margin: 3px;
+  padding: 0;
+}
+.modal-date {
+  opacity: 0.6;
 }
 </style>
