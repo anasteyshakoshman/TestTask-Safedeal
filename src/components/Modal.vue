@@ -169,7 +169,7 @@ export default {
   font-family: Arial, sans-serif;
   font-size: 12px;
   padding: 1px 3px;
-  margin-left: 10px;
+  margin-left: 8px;
   border: 1px solid dodgerblue;
   border-radius: 4px;
 }
