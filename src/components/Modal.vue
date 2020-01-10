@@ -3,31 +3,37 @@
     <div class="modal-mask">
       <div class="modal-wrapper">
         <div class="modal-container">
-          <div class="modal-info">
+          <div class="modal-left">
             <img
             class="modal-img"
             :src="object.url"/>
-            <div
-            v-for="(comment, index) in object.comments"
-            :key="index">
-              <h3 class="modal-date">{{comment.date}}</h3>
-              <h3 :title="comment.name">{{comment.text}}</h3>
-            </div>
             <a-input
-            class="modal-input"
             v-model="nameComment"
-            placeholder="Ваше имя" />
+            placeholder="Ваше имя"
+            class="modal-add-comment"/>
             <a-input
-            class="modal-input"
             v-model="textComment"
-            placeholder="Ваш комментарий" />
+            placeholder="Ваш комментарий"
+            class="modal-add-comment"/>
             <a-button
             type="primary"
-            @click="sendNewComment">
+            @click="sendNewComment"
+            class="modal-add-comment">
               Оставить комментарий
             </a-button>
-            <button class="modal-default-button" @click="$emit('close')"/>
           </div>
+          <div class="modal-middle">
+            <div class="modal-comment"
+             v-for="(comment, index) in object.comments"
+             :key="index">
+              <h3 class="modal-comment-date">{{comment.date}}</h3>
+              <h3 :data-title="comment.name" class="modal-comment-text">{{comment.text}}</h3>
+            </div>
+          </div>
+          <a-button
+          icon="close"
+          class="modal-default-button modal-right"
+          @click="$emit('close')"/>
         </div>
       </div>
     </div>
@@ -49,18 +55,12 @@ export default {
     }
   },
   methods: {
-    convertDate (date) {
-      let day = date.getDate()
-      if (day < 10) day = '0' + day
-      let month = date.getMonth() + 1
-      if (month < 10) month = '0' + month
-      return day + '.' + month + '.' + date.getFullYear()
-    },
     sendNewComment () {
+      if (!this.nameComment || !this.textComment) return
       this.$emit('addComment', {
         name: this.nameComment,
         text: this.textComment,
-        date: this.convertDate(new Date())
+        date: Date.now()
       })
       this.nameComment = ''
       this.textComment = ''
@@ -70,9 +70,6 @@ export default {
 </script>
 
 <style scoped>
-.modal-img {
-  width: 300px;
-}
 .modal-mask {
   position: fixed;
   top: 0;
@@ -90,19 +87,14 @@ export default {
 }
 
 .modal-container {
-  width: 619px;
-  height: 425px;
-  margin: 0px auto;
-  padding: 10px;
+  width: 620px;
+  height: 450px;
+  margin: 0 auto;
+  padding: 0 0 30px 30px;
   background-color: #fff;
   border-radius: 2px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, .33);
   transition: all .3s ease;
-  font-family: Helvetica, Arial, sans-serif;
-}
-
-.modal-default-button {
-  float: right;
 }
 
 .modal-enter .modal-container,
@@ -110,14 +102,80 @@ export default {
   -webkit-transform: scale(1.1);
   transform: scale(1.1);
 }
-.modal-input {
-  width: 300px;
+
+.modal-left, .modal-middle, .modal-right {
+  display: inline-block;
+  vertical-align: top;
 }
-.modal-info {
-  margin: 3px;
-  padding: 0;
+
+.modal-left, .modal-middle {
+  margin-top: 30px;
+  float: left;
 }
-.modal-date {
+
+.modal-left {
+  width: 370px;
+  margin-right: 15px;
+}
+
+.modal-middle {
+  width: 160px;
+  max-height: 388px;
+  padding-right: 15px;
+  overflow-y: scroll;
+}
+
+.modal-right {
+  margin: 10px 10px 0 0;
+}
+
+.modal-add-comment {
+  display: block;
+  width: 100%;
+}
+
+.modal-img {
+  display: block;
+  max-height: 247px;
+}
+
+.modal-add-comment {
+  margin-top: 18px;
+}
+
+.modal-comment {
+  font-family: Helvetica, Arial, sans-serif;
+  display: block;
+  margin-bottom: 10px;
+  font-size: 11px;
+  text-align: left;
+}
+
+.modal-comment-date {
+  margin: 0 auto;
   opacity: 0.6;
+}
+
+.modal-comment-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.modal-comment-text:hover::after {
+  content: attr(data-title);
+  z-index: 1;
+  background: white;
+  color: dodgerblue;
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  padding: 1px 3px;
+  margin-left: 10px;
+  border: 1px solid dodgerblue;
+  border-radius: 4px;
+}
+
+.modal-default-button {
+  display: block;
+  float: right;
 }
 </style>
